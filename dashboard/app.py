@@ -13,6 +13,7 @@ Rodar localmente:
 Acesse http://localhost:5000
 """
 
+import os
 import sqlite3
 import time
 
@@ -32,7 +33,11 @@ COINGECKO_MARKETS = (
 )
 
 app = Flask(__name__)
-app.secret_key = "troque-por-uma-chave-secreta"
+
+# Em produção: export FLASK_SECRET_KEY=<chave gerada com `python -c "import os; print(os.urandom(32).hex())"`>
+# Sem a variável, uma chave aleatória é gerada a cada execução (as sessões
+# não sobrevivem a um restart, mas nenhuma chave fica exposta no código).
+app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.urandom(32).hex()
 
 
 # ---------------------------------------------------------------- banco
@@ -331,4 +336,8 @@ def api_analysis():
 
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, port=5000)
+    # debug nunca fica ligado por padrão; em produção use um servidor WSGI
+    # (ex.: gunicorn) em vez de `python app.py`
+    debug = os.environ.get("FLASK_DEBUG") == "1"
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=debug, port=port)

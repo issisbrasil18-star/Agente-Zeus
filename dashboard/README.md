@@ -23,6 +23,18 @@ python app.py
 
 Depois abra http://localhost:5000
 
+### Variáveis de ambiente
+
+| Variável | Padrão | Para quê |
+|---|---|---|
+| `FLASK_SECRET_KEY` | chave aleatória a cada execução | assina os cookies de sessão. **Em produção, sempre defina** com `python -c "import os; print(os.urandom(32).hex())"` |
+| `FLASK_DEBUG` | desligado | `1` liga o modo debug (apenas desenvolvimento) |
+| `PORT` | `5000` | porta do servidor (útil em deploys) |
+
+> Produção: rode com um servidor WSGI (ex.: `gunicorn app:app`), nunca com
+> `python app.py` nem com debug ligado. Nunca coloque o valor da
+> `FLASK_SECRET_KEY` no Git.
+
 ## Estrutura
 
 ```
