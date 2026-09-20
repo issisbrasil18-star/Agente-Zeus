@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="cards">
+  <div class="card">
+    <h3>Valor da carteira</h3>
+    <p class="big">${{ "{:,.2f}".format(total) }}</p>
+    <p class="muted">{{ portfolio | length }} ativos</p>
+  </div>
+  <div class="card">
+    <h3>Mercado</h3>
+    <p class="big">{{ market | length }} moedas</p>
+    <p class="muted">atualizado ao vivo (CoinGecko)</p>
+  </div>
+  <div class="card">
+    <h3>Alertas ativos</h3>
+    {% set ns = namespace(active=0) %}
+    {% for a in alerts %}{% if not a.triggered %}{% set ns.active = ns.active + 1 %}{% endif %}{% endfor %}
+    <p class="big">{{ ns.active }}</p>
+    <p class="muted">{{ alerts | length }} no total</p>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>💰 Carteira</h2>
+  <form method="post" action="{{ url_for('portfolio_add') }}" class="inline-form">
+    <select name="coin_id" required>
+      <option value="">moeda…</option>
+      {% for c in market %}
+      <option value="{{ c.id }}">{{ c.symbol | upper }} — {{ c.name }}</option>
+      {% endfor %}
+    </select>
+    <input type="number" step="any" min="0" name="amount" placeholder="quantidade" required>
+    <button type="submit">Adicionar</button>
+  </form>
+  <table>
+    <thead><tr><th>Moeda</th><th>Qtd</th><th>Preço</th><th>Valor</th><th></th></tr></thead>
+    <tbody>
+      {% for p in portfolio %}
+      <tr>
+        <td>{{ p.symbol }}</td>
+        <td>{{ p.amount }}</td>
+        <td>${{ "{:,.2f}".format(p.price) }}</td>
+        <td>${{ "{:,.2f}".format(p.value) }}</td>
+        <td><form method="post" action="{{ url_for('portfolio_remove', item_id=p.id) }}">
+          <button class="danger">remover</button></form></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">Carteira vazia — adicione sua primeira moeda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>🔔 Alertas do bot</h2>
+  <form method="post" action="{{ url_for('alerts_add') }}" class="inline-form">
+    <select name="coin_id" required>
+      <option value="">moeda…</option>
+      {% for c in market %}
+      <option value="{{ c.id }}">{{ c.symbol | upper }}</option>
+      {% endfor %}
+    </select>
+    <select name="direction">
+      <option value="acima">acima de</option>
+      <option value="abaixo">abaixo de</option>
+    </select>
+    <input type="number" step="any" min="0" name="threshold" placeholder="US$" required>
+    <button type="submit">Criar alerta</button>
+  </form>
+  <table>
+    <thead><tr><th>Moeda</th><th>Condição</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for a in alerts %}
+      <tr>
+        <td>{{ a.symbol }}</td>
+        <td>{{ a.direction }} de ${{ "{:,.2f}".format(a.threshold) }}</td>
+        <td>{% if a.triggered %}<span class="ok">✔ {{ a.message }}</span>{% else %}aguardando{% endif %}</td>
+        <td><form method="post" action="{{ url_for('alerts_remove', alert_id=a.id) }}">
+          <button class="danger">remover</button></form></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">Nenhum alerta ainda.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>📈 Top 20 moedas</h2>
+  <table>
+    <thead><tr><th>#</th><th>Moeda</th><th>Preço</th><th>24h</th><th>Market cap</th></tr></thead>
+    <tbody>
+      {% for c in market %}
+      <tr>
+        <td class="muted">{{ loop.index }}</td>
+        <td><img src="{{ c.image }}" width="16" alt=""> {{ c.symbol | upper }}</td>
+        <td>${{ "{:,.2f}".format(c.current_price) }}</td>
+        <td class="{{ 'up' if c.price_change_percentage_24h >= 0 else 'down' }}">
+          {{ "%.2f" | format(c.price_change_percentage_24h or 0) }}%
+        </td>
+        <td>${{ "{:,.0f}".format(c.market_cap or 0) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
