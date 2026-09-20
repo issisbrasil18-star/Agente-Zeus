@@ -2,8 +2,8 @@
 
 Agente/bot de criptomoedas com dashboard web, construído com **Python + Flask**.
 
-Este é o repositório oficial do projeto. Os repositórios antigos duplicados
-(`Agente-Alfa-omega` e `Alfa-mega-`) foram arquivados.
+Este é o repositório oficial do projeto. Uma cópia pública do código está em
+https://github.com/issisbrasil18-star/Agente-Alfa-omega (`Alfa-mega-` foi arquivado).
 
 ## Status atual (20/09/2026)
 
