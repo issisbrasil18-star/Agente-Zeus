@@ -56,3 +56,13 @@ th { color: #8b949e; font-weight: 600; font-size: .8rem; text-transform: upperca
 @media (max-width: 640px) {
   .inline-form { flex-direction: column; }
 }
+
+/* análise do agente */
+.analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.analysis-grid h4 { font-size: .85rem; color: #8b949e; margin-bottom: 8px; text-transform: uppercase; }
+.analysis-grid ul { list-style: none; }
+.analysis-grid li { padding: 4px 0; font-size: .92rem; }
+.sentiment { margin-bottom: 14px; font-size: 1rem; }
+.sentiment.otimista { color: #3fb950; }
+.sentiment.pessimista { color: #f85149; }
+.sentiment.neutro { color: #d29922; }

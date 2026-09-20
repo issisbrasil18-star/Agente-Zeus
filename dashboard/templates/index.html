@@ -8,9 +8,9 @@
     <p class="muted">{{ portfolio | length }} ativos</p>
   </div>
   <div class="card">
-    <h3>Mercado</h3>
-    <p class="big">{{ market | length }} moedas</p>
-    <p class="muted">atualizado ao vivo (CoinGecko)</p>
+    <h3>Sentimento do agente</h3>
+    <p class="big">{{ analysis.sentiment if analysis else '—' }}</p>
+    <p class="muted">{{ analysis.ups if analysis else 0 }} subindo / {{ analysis.downs if analysis else 0 }} caindo (24h)</p>
   </div>
   <div class="card">
     <h3>Alertas ativos</h3>
@@ -20,6 +20,39 @@
     <p class="muted">{{ alerts | length }} no total</p>
   </div>
 </section>
+
+{% if analysis %}
+<section class="panel analysis">
+  <h2>🤖 Análise do Agente</h2>
+  <p class="sentiment {{ analysis.sentiment }}">{{ analysis.sentiment_note }}</p>
+  <div class="analysis-grid">
+    <div>
+      <h4>Top altas (24h)</h4>
+      <ul>
+        {% for c in analysis.top_gainers %}
+        <li><img src="{{ c.image }}" width="14" alt=""> {{ c.symbol | upper }}
+            <span class="up">{{ "%.2f" | format(c.price_change_percentage_24h or 0) }}%</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h4>Top baixas (24h)</h4>
+      <ul>
+        {% for c in analysis.top_losers %}
+        <li><img src="{{ c.image }}" width="14" alt=""> {{ c.symbol | upper }}
+            <span class="down">{{ "%.2f" | format(c.price_change_percentage_24h or 0) }}%</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h4>Leitura da carteira</h4>
+      <ul>
+        {% for n in analysis.notes %}<li>{{ n }}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <section class="panel">
   <h2>💰 Carteira</h2>
@@ -34,19 +67,20 @@
     <button type="submit">Adicionar</button>
   </form>
   <table>
-    <thead><tr><th>Moeda</th><th>Qtd</th><th>Preço</th><th>Valor</th><th></th></tr></thead>
+    <thead><tr><th>Moeda</th><th>Qtd</th><th>Preço</th><th>24h</th><th>Valor</th><th></th></tr></thead>
     <tbody>
       {% for p in portfolio %}
       <tr>
         <td>{{ p.symbol }}</td>
         <td>{{ p.amount }}</td>
         <td>${{ "{:,.2f}".format(p.price) }}</td>
+        <td class="{{ 'up' if p.change_24h >= 0 else 'down' }}">{{ "%+.2f" | format(p.change_24h) }}%</td>
         <td>${{ "{:,.2f}".format(p.value) }}</td>
         <td><form method="post" action="{{ url_for('portfolio_remove', item_id=p.id) }}">
           <button class="danger">remover</button></form></td>
       </tr>
       {% else %}
-      <tr><td colspan="5" class="muted">Carteira vazia — adicione sua primeira moeda.</td></tr>
+      <tr><td colspan="6" class="muted">Carteira vazia — adicione sua primeira moeda.</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -61,7 +95,11 @@
       <option value="{{ c.id }}">{{ c.symbol | upper }}</option>
       {% endfor %}
     </select>
-    <select name="direction">
+    <select name="kind" id="kind-select" onchange="toggleKind()">
+      <option value="preco">preço</option>
+      <option value="variacao">variação 24h</option>
+    </select>
+    <select name="direction" id="dir-select">
       <option value="acima">acima de</option>
       <option value="abaixo">abaixo de</option>
     </select>
@@ -69,18 +107,19 @@
     <button type="submit">Criar alerta</button>
   </form>
   <table>
-    <thead><tr><th>Moeda</th><th>Condição</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Moeda</th><th>Tipo</th><th>Condição</th><th>Status</th><th></th></tr></thead>
     <tbody>
       {% for a in alerts %}
       <tr>
         <td>{{ a.symbol }}</td>
-        <td>{{ a.direction }} de ${{ "{:,.2f}".format(a.threshold) }}</td>
+        <td>{{ 'variação 24h' if a.kind == 'variacao' else 'preço' }}</td>
+        <td>{{ a.direction }} de {{ '%' if a.kind == 'variacao' else '$' }}{{ "{:,.2f}".format(a.threshold) }}</td>
         <td>{% if a.triggered %}<span class="ok">✔ {{ a.message }}</span>{% else %}aguardando{% endif %}</td>
         <td><form method="post" action="{{ url_for('alerts_remove', alert_id=a.id) }}">
           <button class="danger">remover</button></form></td>
       </tr>
       {% else %}
-      <tr><td colspan="4" class="muted">Nenhum alerta ainda.</td></tr>
+      <tr><td colspan="5" class="muted">Nenhum alerta ainda.</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -89,7 +128,7 @@
 <section class="panel">
   <h2>📈 Top 20 moedas</h2>
   <table>
-    <thead><tr><th>#</th><th>Moeda</th><th>Preço</th><th>24h</th><th>Market cap</th></tr></thead>
+    <thead><tr><th>#</th><th>Moeda</th><th>Preço</th><th>24h</th><th>7d</th><th>Market cap</th></tr></thead>
     <tbody>
       {% for c in market %}
       <tr>
@@ -97,12 +136,30 @@
         <td><img src="{{ c.image }}" width="16" alt=""> {{ c.symbol | upper }}</td>
         <td>${{ "{:,.2f}".format(c.current_price) }}</td>
         <td class="{{ 'up' if c.price_change_percentage_24h >= 0 else 'down' }}">
-          {{ "%.2f" | format(c.price_change_percentage_24h or 0) }}%
-        </td>
+          {{ "%+.2f" | format(c.price_change_percentage_24h or 0) }}%</td>
+        <td class="{{ 'up' if (c.price_change_percentage_7d_in_currency or 0) >= 0 else 'down' }}">
+          {{ "%+.2f" | format(c.price_change_percentage_7d_in_currency or 0) }}%</td>
         <td>${{ "{:,.0f}".format(c.market_cap or 0) }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </section>
+
+<script>
+function toggleKind() {
+  const kind = document.getElementById('kind-select').value;
+  const dir = document.getElementById('dir-select');
+  const input = document.querySelector('input[name=threshold]');
+  if (kind === 'variacao') {
+    input.placeholder = '%';
+    dir.options[0].text = 'subiu mais que';
+    dir.options[1].text = 'caiu mais que';
+  } else {
+    input.placeholder = 'US$';
+    dir.options[0].text = 'acima de';
+    dir.options[1].text = 'abaixo de';
+  }
+}
+</script>
 {% endblock %}

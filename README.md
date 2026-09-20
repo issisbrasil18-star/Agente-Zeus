@@ -7,8 +7,10 @@ Este é o repositório oficial do projeto. Os repositórios antigos duplicados
 
 ## Status atual (20/09/2026)
 
-✅ **Dashboard funcionando** — app Flask completo em `dashboard/`:
-preços ao vivo (CoinGecko), carteira, alertas de preço e histórico em SQLite.
+✅ **Dashboard + agente funcionando** — o app em `dashboard/` agora inclui:
+preços ao vivo (CoinGecko), carteira, alertas de preço **e de variação 24h**,
+análise do agente (sentimento do mercado, top altas/baixas, leitura da carteira)
+e histórico em SQLite.
 
 > A primeira versão foi prototipada na plataforma Manus
 > (https://manus.im/share/KCzh3fECZWV8gbuaa629SX). Como o replay do Manus não
@@ -43,9 +45,9 @@ Depois abra http://localhost:5000
 ## Roadmap
 
 1. [x] Importar o código do dashboard Flask para `dashboard/`
-2. [ ] Definir fontes de dados de preços (API de exchange)
-3. [ ] Implementar a lógica do agente (regras de análise e alertas)
-4. [ ] Testar localmente e documentar como rodar
+2. [x] Definir fontes de dados de preços (CoinGecko, com cache de 60s)
+3. [x] Implementar a lógica do agente (análise de mercado e alertas)
+4. [x] Testar localmente e documentar como rodar
 5. [ ] Deploy (Render, Railway ou similar)
 
 ## Como vai funcionar
