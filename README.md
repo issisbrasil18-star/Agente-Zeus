@@ -1,57 +1,12 @@
-# Agente Zeus
+# [CONSOLIDADO] Este repo foi unificado
 
-Agente/bot de criptomoedas com dashboard web, construído com **Python + Flask**.
+Em **03/10/2026** todos os projetos do ecossistema foram consolidados em um
+único repositório: **`issisbrasil18-star/Alfa-Platform`** (privado).
 
-Este é o repositório oficial do projeto. Uma cópia pública do código está em
-https://github.com/issisbrasil18-star/Agente-Alfa-omega (`Alfa-mega-` foi arquivado).
+Dashboard de portfólio CoinGecko (carteira, alertas, sentimento por amplitude 24h). Consolidado no projeto único em 03/10/2026; código preservado em archive/legacy-dashboards/.
 
-## Status atual (20/09/2026)
+Este repositório permanece apenas como registro histórico (arquivado,
+somente leitura). Toda evolução acontece no projeto único.
 
-✅ **Dashboard + agente funcionando** — o app em `dashboard/` agora inclui:
-preços ao vivo (CoinGecko), carteira, alertas de preço **e de variação 24h**,
-análise do agente (sentimento do mercado, top altas/baixas, leitura da carteira)
-e histórico em SQLite.
-
-> A primeira versão foi prototipada na plataforma Manus
-> (https://manus.im/share/KCzh3fECZWV8gbuaa629SX). Como o replay do Manus não
-> expõe os arquivos, o código foi recriado aqui a partir daquele design.
-
-## Como rodar
-
-```bash
-cd dashboard
-pip install -r requirements.txt
-python app.py
-```
-
-Depois abra http://localhost:5000
-
-## Estrutura do repositório
-
-```
-/
-├── README.md            # este arquivo
-├── .gitignore
-├── dashboard/           # app Flask (bot de crypto)
-│   ├── app.py
-│   ├── requirements.txt
-│   ├── README.md        # detalhes e observações do dashboard
-│   ├── static/css/
-│   └── templates/
-├── agente/              # (futuro) lógica avançada do agente
-└── docs/                # (futuro) documentação e notas
-```
-
-## Roadmap
-
-1. [x] Importar o código do dashboard Flask para `dashboard/`
-2. [x] Definir fontes de dados de preços (CoinGecko, com cache de 60s)
-3. [x] Implementar a lógica do agente (análise de mercado e alertas)
-4. [x] Testar localmente e documentar como rodar
-5. [ ] Deploy (Render, Railway ou similar)
-
-## Como vai funcionar
-
-O projeto unifica as três ideias anteriores (Zeus, Alfa-omega, Alfa-mega) em um
-só lugar: um agente de criptomoedas que analisa o mercado e exibe os resultados
-num dashboard web.
+Para reativar: Settings → Danger Zone → "Unarchive this repository"
+(ou pedir ao agente para desarquivar via API).
